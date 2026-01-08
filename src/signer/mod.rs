@@ -173,6 +173,10 @@ impl Signer {
             payload: serde_json::to_string(&tx_json).unwrap(),
         };
 
+        // Debug logging
+        tracing::info!("FFI Tx Data: {:?}", tx_json);
+        tracing::info!("Has Eth Signer: {}", self.eth.is_some());
+
         // check we actually have something to sign
         if let Some(msg) = tx_json["MessageToSign"].as_str() {
             // sign
@@ -193,6 +197,10 @@ impl Signer {
         }
 
         Ok(tx_info)
+    }
+
+    pub fn get_auth_token(&self) -> Result<String> {
+        self.ffi.get_auth_token(None)
     }
 
     fn sign_message(&self, message: &str) -> Result<String> {

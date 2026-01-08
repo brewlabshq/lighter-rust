@@ -124,6 +124,11 @@ impl LighterConfig {
         self
     }
 
+    pub fn without_retry(mut self) -> Self {
+        self.retry_config = None;
+        self
+    }
+
     pub fn with_pool_max_idle_per_host(mut self, pool_max_idle_per_host: usize) -> Self {
         self.pool_max_idle_per_host = Some(pool_max_idle_per_host);
         self

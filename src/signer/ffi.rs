@@ -43,8 +43,14 @@ impl FFISigner {
         api_key_index: i32,
         account_index: i32,
     ) -> Result<Self> {
-        let chain_id = if url.contains("mainnet") { 304 } else { 300 };
+        let chain_id = std::env::var("LIGHTER_CHAIN_ID")
+            .ok()
+            .and_then(|s| s.parse::<i32>().ok())
+            .unwrap_or(if url.contains("mainnet") { 304 } else { 300 });
         let clean_key = private_key.expose_secret().trim_start_matches("0x");
+
+        tracing::info!("Initializing FFISigner: URL={}, ChainID={}, ApiKeyIdx={}, AccountIdx={}", url, chain_id, api_key_index, account_index);
+        tracing::info!("Lighter Private Key: len={} (original), starts_with_0x={}", private_key.expose_secret().len(), private_key.expose_secret().starts_with("0x"));
 
         let signer = Self {
             url: url.to_string(),
@@ -78,7 +84,7 @@ impl FFISigner {
                     data.reduce_only as c_int,
                     data.trigger_price,
                     data.order_expiry as c_longlong,
-                    1,
+                    nonce as c_longlong, // Fixed nonce passing
                 )
             },
             TxData::SignCreateGroupedOrders(mut data) => {
